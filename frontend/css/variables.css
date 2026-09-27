@@ -1,0 +1,67 @@
+/* Geonova Design System: Color Tokens, Glassmorphism, & Typography */
+:root {
+    /* Color Palette */
+    --primary-navy: #f8fafc;
+    --navy-surface: #f1f5f9;
+    --navy-card: #ffffff;
+    --navy-border: rgba(0, 0, 0, 0.1);
+    
+    --brand-blue: #2563eb;
+    --brand-blue-hover: #1d4ed8;
+    --brand-blue-glow: rgba(37, 99, 235, 0.35);
+
+    --safe-emerald: #059669;
+    --safe-emerald-light: #10b981;
+    --safe-emerald-glow: rgba(16, 185, 129, 0.3);
+
+    --sos-crimson: #dc2626;
+    --sos-crimson-hover: #b91c1c;
+    --sos-crimson-glow: rgba(220, 38, 38, 0.45);
+
+    --alert-amber: #d97706;
+    --alert-amber-light: #f59e0b;
+    --alert-amber-glow: rgba(245, 158, 11, 0.3);
+
+    /* Text Colors */
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --text-subtle: #64748b;
+    --text-dark: #0f172a;
+
+    /* Backgrounds */
+    --bg-dark: #f8fafc;
+    --bg-dark-secondary: #f1f5f9;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    --bg-glass-card: rgba(255, 255, 255, 0.75);
+    --bg-glass-card-hover: rgba(241, 245, 249, 0.85);
+
+    /* Gradients */
+    --grad-hero: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+    --grad-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    --grad-emerald: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    --grad-sos: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    --grad-gold: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+
+    /* Shadows & Glows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+
+    /* Border Radii */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 26px;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-norm: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Layout Constraints */
+    --max-width: 1440px;
+    --header-height: 72px;
+    --dashboard-vh: calc(100vh - var(--header-height));
+}
