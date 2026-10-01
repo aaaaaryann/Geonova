@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geonova — Smart Tourist Safety & Tourism Promotion Platform | Explore Freely. Travel Safely.</title>
+    <meta name="description" content="Geonova combines exploration across all 28 Indian states & 8 Union Territories with real-time GPS geofencing, emergency SOS, verified local authorities, travel packages, and secure document vault." />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Geonova Stylesheets -->
+    <link rel="stylesheet" href="/static/css/variables.css" />
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="stylesheet" href="/static/css/components.css" />
+    <link rel="stylesheet" href="/static/css/map.css" />
+    <link rel="stylesheet" href="/static/css/dashboard.css" />
+</head>
+<body>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="container">
+            <a href="#home" class="nav-brand" onclick="app.navigate('home')">
+                <div class="brand-icon" style="background: transparent; box-shadow: none;">
+                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" stroke="#7A4E1B" stroke-width="3">
+                        <circle cx="50" cy="50" r="48" fill="none"/>
+                        <!-- Taj Mahal Silhouette -->
+                        <path d="M50 20 C55 20, 60 28, 60 40 C65 40, 65 45, 65 45 L65 75 L35 75 L35 45 C35 45, 35 40, 40 40 C40 28, 45 20, 50 20 Z" fill="#7A4E1B" stroke="none"/>
+                        <path d="M25 45 L25 75 L30 75 L30 45 Z" fill="#7A4E1B" stroke="none"/>
+                        <path d="M75 45 L75 75 L70 75 L70 45 Z" fill="#7A4E1B" stroke="none"/>
+                        <!-- Domes -->
+                        <path d="M38 35 C38 32, 42 32, 42 35 Z" fill="#7A4E1B" stroke="none"/>
+                        <path d="M62 35 C62 32, 58 32, 58 35 Z" fill="#7A4E1B" stroke="none"/>
+                        <!-- Arches -->
+                        <path d="M42 75 L42 55 C42 50, 58 50, 58 55 L58 75 Z" fill="#ffffff" stroke="none"/>
+                    </svg>
+                </div>
+                <div>
+                    Geonova
+                    <span class="brand-tagline" data-i18n="tagline">Explore Freely • Travel Safely</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Menu -->
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active" data-i18n="nav_home">Home</a></li>
+                <li><a href="#explore" class="nav-link" data-i18n="nav_explore">Explore India</a></li>
+                <li><a href="#map" class="nav-link" data-i18n="nav_map">Live Map & Radar</a></li>
+                <li><a href="#protocols" class="nav-link" data-i18n="nav_protocols">Safety Protocols</a></li>
+                <li><a href="#packages" class="nav-link" data-i18n="nav_packages">Packages</a></li>
+                <li><a href="#vault" class="nav-link" data-i18n="nav_vault">Document Vault</a></li>
+                <li><a href="#pricing" class="nav-link" data-i18n="nav_pricing">Subscriptions</a></li>
+                <li><a href="#about" class="nav-link" data-i18n="nav_about">About</a></li>
+                <li>
+                    <button class="nav-sos-btn" onclick="sosManager.openSOSModal()">
+                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ffffff;"></span>
+                        <span data-i18n="nav_sos">SOS</span>
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Language Selector Dropdown -->
+            <div class="lang-selector-container">
+                <span style="font-size: 0.95rem;">🌐</span>
+                <select id="language-select" class="lang-select" aria-label="Select Language">
+                    <option value="en">English (EN)</option>
+                    <option value="hi">हिन्दी (HI)</option>
+                    <option value="es">Español (ES)</option>
+                    <option value="fr">Français (FR)</option>
+                    <option value="zh">中文 (ZH)</option>
+                    <option value="de">Deutsch (DE)</option>
+                </select>
+            </div>
+
+            <!-- User Profile & Action Controls -->
+            <div class="nav-actions" id="user-nav-actions">
+                <button class="btn btn-outline btn-sm btn-login" onclick="app.navigate('login')" data-i18n="nav_login">Login</button>
+                <button class="btn btn-primary btn-sm" onclick="auth.openRegisterModal()" data-i18n="nav_register">Register</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Floating Quick SOS Trigger Button (Fixed Bottom-Right) -->
+    <button class="floating-sos-trigger" id="floating-sos-btn" onclick="sosManager.openSOSModal()" title="Emergency SOS Assistance">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span data-i18n="floating_sos_label">EMERGENCY SOS</span>
+    </button>
+
+    <!-- Mobile Bottom Navigation Dock -->
+    <nav class="mobile-bottom-nav">
+        <div class="bottom-nav-item active" data-route="home" onclick="app.navigate('home')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span data-i18n="nav_home">Home</span>
+        </div>
+        <div class="bottom-nav-item" data-route="explore" onclick="app.navigate('explore')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span data-i18n="nav_explore">Explore</span>
+        </div>
+        <div class="bottom-nav-sos" onclick="sosManager.openSOSModal()">
+            <span data-i18n="nav_sos">SOS</span>
+        </div>
+        <div class="bottom-nav-item" data-route="map" onclick="app.navigate('map')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+            <span data-i18n="nav_map">Map</span>
+        </div>
+        <div class="bottom-nav-item" data-route="dashboard" onclick="app.navigate('dashboard')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span data-i18n="nav_profile">Profile</span>
+        </div>
+    </nav>
+
+    <!-- MAIN VIEWS WRAPPER -->
+    <main style="flex: 1;">
+
+        <!-- 0. DEDICATED MULTI-CHANNEL LOGIN VIEW -->
+        <div id="view-login" class="app-view" style="display: none;">
+            <section class="login-page-section">
+                <div class="login-card-wrapper">
+                    <div class="login-card">
+                        <!-- Header -->
+                        <div class="login-header">
+                            <div class="login-brand-badge">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span>Geonova Unified Gateway</span>
+                            </div>
+                            <h2 class="login-title">Sign In to Geonova</h2>
+                            <p class="login-subtitle">Choose your authentication channel to access telemetry & safety passes</p>
+                        </div>
+
+                        <!-- Segmented Tab Triggers: Gmail, Phone, Aadhaar -->
+                        <div class="auth-segmented-nav">
+                            <button type="button" class="auth-tab-trigger active" id="tab-btn-google" onclick="auth.switchLoginTab('google')">
+                                <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                <span>Gmail</span>
+                            </button>
+
+                            <button type="button" class="auth-tab-trigger" id="tab-btn-phone" onclick="auth.switchLoginTab('phone')">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                                <span>Phone Number</span>
+                            </button>
+
+                            <button type="button" class="auth-tab-trigger aadhaar-active" id="tab-btn-aadhaar" onclick="auth.switchLoginTab('aadhaar')">
+                                <span style="font-size: 1.1rem; line-height: 1;">🇮🇳</span>
+                                <span>Aadhaar (Indians)</span>
+                            </button>
+                        </div>
+
+                        <!-- 1. GMAIL / GOOGLE PANEL -->
+                        <div class="auth-panel active" id="panel-auth-google">
+                            <button type="button" class="btn-google-action" onclick="auth.handleGoogleLogin(null, 'aarav.tourist.india@gmail.com', 'Aarav Mehta')">
+                                <svg width="20" height="20" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                <span>Continue with Google Account</span>
+                            </button>
+
+                            <div class="auth-divider">
+                                <span>Or enter your Gmail</span>
+                            </div>
+
+                            <form id="form-google-direct" onsubmit="auth.handleGoogleLogin(event)">
+                                <div class="form-group">
+                                    <label class="form-label">Gmail / Google Email</label>
+                                    <input type="email" id="login-google-email" class="form-input" placeholder="e.g. traveler@gmail.com" value="priya.sharma@gmail.com" required />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Full Name (Optional)</label>
+                                    <input type="text" id="login-google-name" class="form-input" placeholder="Priya Sharma" value="Priya Sharma" />
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1rem;">
+                                    Sign In with Google Account
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- 2. PHONE NUMBER PANEL -->
+                        <div class="auth-panel" id="panel-auth-phone">
+                            <form id="form-phone-send" onsubmit="auth.handleSendPhoneOtp(event)">
+                                <div class="form-group">
+                                    <label class="form-label">Mobile Number</label>
+                                    <div class="phone-input-group">
+                                        <select id="phone-prefix" class="form-select phone-prefix-select">
+                                            <option value="+91" selected>🇮🇳 +91</option>
+                                            <option value="+1">🇺🇸 +1</option>
+                                            <option value="+44">🇬🇧 +44</option>
+                                            <option value="+971">🇦🇪 +971</option>
+                                            <option value="+61">🇦🇺 +61</option>
+                                            <option value="+65">🇸🇬 +65</option>
+                                        </select>
+                                        <input type="tel" id="phone-number-input" class="form-input" placeholder="98111 22233" value="9811122233" required />
+                                    </div>
+                                    <small style="color: var(--text-muted); font-size: 0.78rem; margin-top: 0.35rem; display: block;">
+                                        An SMS verification OTP will be sent to this number.
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Send Verification Code (OTP)</button>
+                            </form>
+
+                            <!-- Phone OTP Verification Step -->
+                            <div id="phone-otp-step" class="otp-flow-box" style="display: none;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <label class="form-label" style="margin: 0;">Enter 6-Digit SMS Code</label>
+                                    <span id="phone-demo-otp-chip" class="badge badge-amber" style="font-size: 0.75rem;">Demo OTP: 123456</span>
+                                </div>
+                                <form id="form-phone-verify" onsubmit="auth.handleVerifyPhoneOtp(event)">
+                                    <div class="form-group">
+                                        <input type="text" id="phone-otp-input" class="form-input aadhaar-input-box" placeholder="123456" maxlength="6" required />
+                                    </div>
+                                    <button type="submit" class="btn btn-emerald btn-block">Verify OTP & Log In</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- 3. AADHAAR NUMBER PANEL (INDIAN CITIZENS) -->
+                        <div class="auth-panel" id="panel-auth-aadhaar">
+                            <div class="aadhaar-notice-box">
+                                <span style="font-size: 1.25rem;">🇮🇳</span>
+                                <div>
+                                    <strong style="color: #ffffff; display: block; margin-bottom: 0.2rem;">Official Resident Identity Verification (UIDAI e-KYC)</strong>
+                                    Instant Indian citizen verification. Automatically links safety score, emergency insurance telemetry, and official tourist transit passes.
+                                </div>
+                            </div>
+
+                            <form id="form-aadhaar-send" onsubmit="auth.handleSendAadhaarOtp(event)">
+                                <div class="form-group">
+                                    <label class="form-label">12-Digit Aadhaar Number</label>
+                                    <input type="text" id="aadhaar-number-input" class="form-input aadhaar-input-box" placeholder="5489 2104 7782" maxlength="14" oninput="auth.formatAadhaarInput(this)" value="5489 2104 7782" required />
+                                </div>
+
+                                <label class="consent-checkbox-row">
+                                    <input type="checkbox" id="aadhaar-consent-checkbox" checked />
+                                    <span>I hereby give voluntary consent to Geonova to use my Aadhaar Number for authentication via UIDAI e-KYC as per Ministry of Tourism and Electronics & IT norms.</span>
+                                </label>
+
+                                <button type="submit" class="btn btn-emerald btn-block" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%);">
+                                    Request Aadhaar OTP
+                                </button>
+                            </form>
+
+                            <!-- Aadhaar OTP Verification Step -->
+                            <div id="aadhaar-otp-step" class="otp-flow-box" style="display: none;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <label class="form-label" style="margin: 0;">Enter UIDAI Authentication OTP</label>
+                                    <span id="aadhaar-demo-otp-chip" class="badge badge-emerald" style="font-size: 0.75rem;">UIDAI Demo OTP</span>
+                                </div>
+                                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                                    Dispatched to <strong id="aadhaar-masked-target" style="color: #ffffff;">Linked Mobile Number</strong>
+                                </p>
+                                <form id="form-aadhaar-verify" onsubmit="auth.handleVerifyAadhaarOtp(event)">
+                                    <div class="form-group">
+                                        <input type="text" id="aadhaar-otp-input" class="form-input aadhaar-input-box" placeholder="123456" maxlength="6" required />
+                                    </div>
+                                    <button type="submit" class="btn btn-emerald btn-block">Verify Aadhaar & Log In</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- One-Click Demo Testing Chips -->
+                        <div class="demo-chip-box">
+                            <div class="demo-chip-title">One-Click Testing Accounts</div>
+                            <div class="demo-chips-grid">
+                                <button type="button" class="demo-chip-btn" onclick="auth.quickFillMethod('google', 'priya.sharma@gmail.com', 'Priya Sharma')">
+                                    🔵 Gmail Test
+                                </button>
+                                <button type="button" class="demo-chip-btn" onclick="auth.quickFillMethod('phone', '9811122233')">
+                                    🟢 Phone Test
+                                </button>
+                                <button type="button" class="demo-chip-btn" onclick="auth.quickFillMethod('aadhaar', '5489 2104 7782')">
+                                    🇮🇳 Aadhaar Test
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Skip / Guest Action -->
+                        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                            <a href="#home" onclick="app.navigate('home'); return false;" style="color: var(--text-muted); text-decoration: underline;">
+                                Continue as Guest &rarr;
+                            </a>
+                            <span style="color: var(--navy-border);">|</span>
+                            <a href="#" onclick="auth.openRegisterModal(); return false;" style="color: #60a5fa; font-weight: 600;">
+                                Create New Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 1. HOME VIEW -->
+        <div id="view-home" class="app-view">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="container">
+                    <div class="hero-grid">
+                        <div class="hero-content">
+                            <div class="hero-badge">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span data-i18n="hero_badge">Verified National Tourist Safety Platform</span>
+                            </div>
+                            <h1 class="hero-title" data-i18n="hero_title">Discover India.<br />Stay Safe Every Step.</h1>
+                            <p class="hero-subtitle" data-i18n="hero_subtitle">
+                                Combining seamless tourist discovery across all 28 states and 8 Union Territories with intelligent geofencing, instant emergency SOS, verified local authorities, and digital document security.
+                            </p>
+
+                            <!-- Hero Global Destination Search -->
+                            <div class="hero-search-box">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="margin-left: 0.75rem;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="hero-search-input" data-i18n-placeholder="hero_search_placeholder" placeholder="Search state, Taj Mahal, Goa beaches, high passes..." onkeyup="if(event.key==='Enter') { app.navigate('explore'); tourism.searchStates(this.value); }" />
+                                <button class="btn btn-primary btn-sm" onclick="app.navigate('explore'); tourism.searchStates(document.getElementById('hero-search-input').value);" data-i18n="hero_search_btn">Search</button>
+                            </div>
+
+                            <div class="hero-cta-group">
+                                <button class="btn btn-primary btn-lg" onclick="app.navigate('explore')" data-i18n="hero_btn_explore">
+                                    Explore 36 States & UTs →
+                                </button>
+                                <button class="btn btn-emerald btn-lg" onclick="app.navigate('map')" data-i18n="hero_btn_safety">
+                                    Activate Safety Services
+                                </button>
+                            </div>
+
+                            <div class="hero-metrics">
+                                <div class="metric-item">
+                                    <div class="metric-value">36</div>
+                                    <div class="metric-label" data-i18n="metric_states">States & UTs</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">112</div>
+                                    <div class="metric-label" data-i18n="metric_helpline">24/7 Helpline</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">100%</div>
+                                    <div class="metric-label" data-i18n="metric_consent">Consent Tracking</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">13</div>
+                                    <div class="metric-label" data-i18n="metric_protocols">Safety Protocols</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hero Radar Visual Card -->
+                        <div class="hero-visual">
+                            <div class="hero-visual-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <span style="font-weight: 700; color: #ffffff; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                                        <span class="layer-dot dot-safe"></span> <span data-i18n="radar_title">Geonova Geofence Telemetry</span>
+                                    </span>
+                                    <span class="badge badge-emerald" data-i18n="radar_status">Active Shield</span>
+                                </div>
+
+                                <div class="radar-preview">
+                                    <div class="radar-grid-lines"></div>
+                                    <div class="radar-sweep"></div>
+                                    <div class="radar-center-marker"></div>
+                                    
+                                    <div class="radar-card-overlay">
+                                        <div>
+                                            <div style="font-size: 0.72rem; color: var(--safe-emerald-light); font-weight: 700; text-transform: uppercase;" data-i18n="zone_monitor">Zone Monitor</div>
+                                            <div style="color: #ffffff; font-weight: 700; font-size: 0.9rem;" data-i18n="zone_name">Golden Triangle Safe Zone</div>
+                                        </div>
+                                        <button class="btn btn-outline btn-sm" onclick="app.navigate('map')" data-i18n="btn_inspect_map">Inspect Map</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How Geonova Protects Section -->
+            <section class="section" style="background: rgba(11, 19, 43, 0.4);">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="sec_protection_tag">Intelligent Protection</span>
+                        <h2 class="section-title" data-i18n="sec_protection_title">How Geonova Shields Every Traveler</h2>
+                        <p class="section-description" data-i18n="sec_protection_desc">A state-of-the-art dual architecture that combines proactive location intelligence with rapid emergency assistance.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                        <div class="glass-card">
+                            <div style="width: 52px; height: 52px; border-radius: var(--radius-md); background: var(--grad-emerald); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.25rem;">
+                                🌐
+                            </div>
+                            <h3 style="color: #ffffff; font-size: 1.25rem; margin-bottom: 0.5rem;" data-i18n="feat_geofencing_title">Consent-Driven Geofencing</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;" data-i18n="feat_geofencing_desc">
+                                Real-time spatial collision checks alert you the moment you approach high-risk wildlife buffers, hazardous rip currents, or restricted territory.
+                            </p>
+                        </div>
+
+                        <div class="glass-card">
+                            <div style="width: 52px; height: 52px; border-radius: var(--radius-md); background: var(--grad-sos); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.25rem;">
+                                🚨
+                            </div>
+                            <h3 style="color: #ffffff; font-size: 1.25rem; margin-bottom: 0.5rem;" data-i18n="feat_sos_title">2-Step Instant SOS Assist</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;" data-i18n="feat_sos_desc">
+                                Direct one-tap connection to 112, women helplines (1090), and tourist police with a 3-second accidental abort timer, siren tone, and automated incident logs.
+                            </p>
+                        </div>
+
+                        <div class="glass-card">
+                            <div style="width: 52px; height: 52px; border-radius: var(--radius-md); background: var(--grad-primary); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.25rem;">
+                                🔒
+                            </div>
+                            <h3 style="color: #ffffff; font-size: 1.25rem; margin-bottom: 0.5rem;" data-i18n="feat_vault_title">Encrypted Document Vault</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;" data-i18n="feat_vault_desc">
+                                Securely carry your passport, visa, and insurance with automated 30-day expiration countdown alerts and private access controls.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Destinations Preview -->
+            <section class="section">
+                <div class="container">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <span class="section-tag" data-i18n="sec_featured_tag">Iconic India</span>
+                            <h2 class="section-title" style="margin-bottom: 0.5rem;" data-i18n="sec_featured_title">Featured State Highlights</h2>
+                            <p class="section-description" style="margin: 0;" data-i18n="sec_featured_desc">Explore curated cultural, natural, and heritage sanctuaries.</p>
+                        </div>
+                        <button class="btn btn-outline" onclick="app.navigate('explore')" data-i18n="btn_view_all_states">View All 36 States & UTs →</button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.75rem;">
+                        <div class="state-card" onclick="tourism.openStateDetail('RJ')">
+                            <div class="state-card-image">
+                                <img src="https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80" alt="Rajasthan" />
+                                <span class="badge badge-emerald state-card-badge">Northern State</span>
+                            </div>
+                            <div class="state-card-body">
+                                <h3 class="state-card-title">Rajasthan</h3>
+                                <div class="state-card-capital">Capital: Jaipur (Pink City)</div>
+                                <p class="state-card-desc">Royal Rajput hill forts, Thar Desert dunes, and vibrant fairs.</p>
+                                <div class="state-card-footer">
+                                    <span style="color: var(--safe-emerald-light); font-size: 0.8rem;">⭐ 4.9 Safety Score</span>
+                                    <span style="color: #60a5fa; font-weight: 600; font-size: 0.85rem;" data-i18n="btn_view_guide">View Guide →</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="state-card" onclick="tourism.openStateDetail('KL')">
+                            <div class="state-card-image">
+                                <img src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80" alt="Kerala" />
+                                <span class="badge badge-blue state-card-badge">Southern State</span>
+                            </div>
+                            <div class="state-card-body">
+                                <h3 class="state-card-title">Kerala</h3>
+                                <div class="state-card-capital">Capital: Thiruvananthapuram</div>
+                                <p class="state-card-desc">Tranquil Alleppey backwaters, misty Munnar tea hills, and Ayurvedic wellness.</p>
+                                <div class="state-card-footer">
+                                    <span style="color: var(--safe-emerald-light); font-size: 0.8rem;">⭐ 4.95 Safety Score</span>
+                                    <span style="color: #60a5fa; font-weight: 600; font-size: 0.85rem;" data-i18n="btn_view_guide">View Guide →</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="state-card" onclick="tourism.openStateDetail('LA')">
+                            <div class="state-card-image">
+                                <img src="https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=600&q=80" alt="Ladakh" />
+                                <span class="badge badge-emerald state-card-badge">Union Territory</span>
+                            </div>
+                            <div class="state-card-body">
+                                <h3 class="state-card-title">Ladakh</h3>
+                                <div class="state-card-capital">Capital: Leh</div>
+                                <p class="state-card-desc">The Land of High Passes, high-altitude desert Pangong Tso, and monasteries.</p>
+                                <div class="state-card-footer">
+                                    <span style="color: var(--safe-emerald-light); font-size: 0.8rem;">⭐ 4.88 Safety Score</span>
+                                    <span style="color: #60a5fa; font-weight: 600; font-size: 0.85rem;" data-i18n="btn_view_guide">View Guide →</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="state-card" onclick="tourism.openStateDetail('GA')">
+                            <div class="state-card-image">
+                                <img src="https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=600&q=80" alt="Goa" />
+                                <span class="badge badge-blue state-card-badge">Western State</span>
+                            </div>
+                            <div class="state-card-body">
+                                <h3 class="state-card-title">Goa</h3>
+                                <div class="state-card-capital">Capital: Panaji</div>
+                                <p class="state-card-desc">Golden coastline beaches, Portuguese churches, spice plantations, and nightlife.</p>
+                                <div class="state-card-footer">
+                                    <span style="color: var(--safe-emerald-light); font-size: 0.8rem;">⭐ 4.85 Safety Score</span>
+                                    <span style="color: #60a5fa; font-weight: 600; font-size: 0.85rem;" data-i18n="btn_view_guide">View Guide →</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 2. EXPLORE INDIA (ALL 36 STATES & UTs) VIEW -->
+        <div id="view-explore" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="explore_tag">State-Wise Tourism Promotion</span>
+                        <h2 class="section-title" data-i18n="explore_title">Explore All 28 States & 8 Union Territories</h2>
+                        <p class="section-description" data-i18n="explore_desc">
+                            Every state and territory with dedicated travel guides, verified authorities, cultural heritage, and local emergency helplines.
+                        </p>
+                    </div>
+
+                    <!-- Search and Regional Filters -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.5rem;">
+                        <div style="max-width: 500px;">
+                            <input type="text" class="form-input" data-i18n-placeholder="explore_search_placeholder" placeholder="Search state or territory..." oninput="tourism.searchStates(this.value)" />
+                        </div>
+
+                        <div class="filter-tabs" id="region-filter-tabs">
+                            <button class="tab-btn active" onclick="tourism.filterByRegion('all', this)" data-i18n="tab_all">All Regions (36)</button>
+                            <button class="tab-btn" onclick="tourism.filterByRegion('Northern', this)" data-i18n="tab_northern">Northern India (10)</button>
+                            <button class="tab-btn" onclick="tourism.filterByRegion('Western', this)" data-i18n="tab_western">Western & Central (6)</button>
+                            <button class="tab-btn" onclick="tourism.filterByRegion('Eastern', this)" data-i18n="tab_eastern">Eastern India (6)</button>
+                            <button class="tab-btn" onclick="tourism.filterByRegion('Southern', this)" data-i18n="tab_southern">Southern India (7)</button>
+                            <button class="tab-btn" onclick="tourism.filterByRegion('Northeastern', this)" data-i18n="tab_northeastern">Northeastern India (7)</button>
+                        </div>
+
+                        <div id="states-count-badge" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+                            Showing 36 of 36 States & UTs
+                        </div>
+                    </div>
+
+                    <!-- Grid of 36 States -->
+                    <div class="states-grid" id="states-cards-grid">
+                        <!-- Populated dynamically by tourism.js -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 3. LIVE MAP & GEOFENCING VIEW -->
+        <div id="view-map" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="map_tag">Live Location & Geofencing</span>
+                        <h2 class="section-title" data-i18n="map_title">Interactive Tourist Radar & Safe Corridors</h2>
+                        <p class="section-description" data-i18n="map_desc">
+                            Visual geofencing with audible hazard warnings, verified safe zones, emergency hospitals, and route simulation.
+                        </p>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div class="map-container-wrapper" style="position: relative;">
+                        <div id="map-controls-overlay" style="position: absolute; top: 1rem; right: 1rem; z-index: 1000; background: rgba(11, 19, 43, 0.85); padding: 1rem; border-radius: 0.5rem; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); width: 280px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                            <h4 style="margin: 0 0 0.75rem 0; color: #ffffff; font-size: 1.1rem;">Radar Controls</h4>
+                            <div style="margin-bottom: 0.75rem;">
+                                <span id="tracking-status-badge" class="badge badge-amber" style="display: inline-block; margin-bottom: 0.5rem;">Standby / Simulated</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <button id="toggle-gps-btn" class="btn btn-primary btn-sm" onclick="mapManager.toggleRealLocation()">📡 Share Live Location</button>
+                                <button id="sim-toggle-btn" class="btn btn-outline btn-sm" onclick="mapManager.startRouteSimulation()">▶️ Start Route Simulation</button>
+                                <button id="measure-toggle-btn" class="btn btn-emerald btn-sm" onclick="mapManager.toggleMeasure()">📏 Measure Distance</button>
+                            </div>
+                            <div id="geofence-alert-banner" style="margin-top: 1rem; display: none; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.85rem; font-weight: bold;">
+                                <span id="geofence-alert-text"></span>
+                            </div>
+                            <div style="margin-top: 0.75rem; font-size: 0.8rem; color: #cbd5e1; display: flex; justify-content: space-between;">
+                                <span>Lat: <span id="live-lat-display">28.6315</span></span>
+                                <span>Lng: <span id="live-lng-display">77.2167</span></span>
+                            </div>
+                        </div>
+                        <div id="map" style="width: 100%; height: 600px; border-radius: 1rem;"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 4. SAFETY PROTOCOLS LIBRARY VIEW -->
+        <div id="view-protocols" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="protocols_tag">Safety Knowledge Base</span>
+                        <h2 class="section-title" data-i18n="protocols_title">13 Essential Tourist Safety Protocols</h2>
+                        <p class="section-description" data-i18n="protocols_desc">Official statutory guidelines, warning signs, do's & don'ts for domestic and foreign travelers.</p>
+                    </div>
+
+                    <div style="max-width: 600px; margin: 0 auto 2.5rem;">
+                        <input type="text" class="form-input" data-i18n-placeholder="protocols_search_placeholder" placeholder="Search safety protocols (e.g. Solo, Women, Mountain, Cyber Scams)..." oninput="app.searchProtocols(this.value)" />
+                    </div>
+
+                    <div id="protocols-cards-container">
+                        <!-- Loaded dynamically by app.js -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 5. PACKAGES & BOOKING MARKETPLACE VIEW -->
+        <div id="view-packages" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="packages_tag">Curated Travel</span>
+                        <h2 class="section-title" data-i18n="packages_title">Verified Tourism Packages & Certified Guides</h2>
+                        <p class="section-description" data-i18n="packages_desc">Book verified tours equipped with GPS tracking, emergency first-aid, and certified local guides.</p>
+                    </div>
+
+                    <div class="packages-grid" id="packages-cards-grid">
+                        <!-- Loaded dynamically by packages.js -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 6. DOCUMENT VAULT VIEW -->
+        <div id="view-vault" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container">
+                    <!-- Vault Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <span class="section-tag" data-i18n="vault_tag">Encrypted Travel Locker</span>
+                            <h2 class="section-title" style="margin-bottom: 0.5rem;" data-i18n="vault_title">Document Vault</h2>
+                            <p class="section-description" style="margin: 0;" data-i18n="vault_desc">Store passports, visas, national IDs, address certificates, and more — all encrypted with 30-day expiry alerts.</p>
+                        </div>
+                        <button class="btn btn-emerald" onclick="vaultManager.openUploadModal()" data-i18n="btn_upload_doc">+ Upload Document</button>
+                    </div>
+
+                    <!-- Document Type Stats Bar -->
+                    <div class="vault-stats-bar" id="vault-stats-bar">
+                        <div class="vault-stat-chip" onclick="vaultManager.filterByCategory('all')" data-cat="all">
+                            <span class="vault-stat-icon">🗂️</span>
+                            <div>
+                                <div class="vault-stat-count" id="stat-count-all">0</div>
+                                <div class="vault-stat-label">All Documents</div>
+                            </div>
+                        </div>
+                        <div class="vault-stat-chip" onclick="vaultManager.filterByCategory('passport')" data-cat="passport">
+                            <span class="vault-stat-icon">🛂</span>
+                            <div>
+                                <div class="vault-stat-count" id="stat-count-passport">0</div>
+                                <div class="vault-stat-label">Passports</div>
+                            </div>
+                        </div>
+                        <div class="vault-stat-chip" onclick="vaultManager.filterByCategory('visa')" data-cat="visa">
+                            <span class="vault-stat-icon">🔏</span>
+                            <div>
+                                <div class="vault-stat-count" id="stat-count-visa">0</div>
+                                <div class="vault-stat-label">Visas</div>
+                            </div>
+                        </div>
+                        <div class="vault-stat-chip" onclick="vaultManager.filterByCategory('national_id')" data-cat="national_id">
+                            <span class="vault-stat-icon">🪪</span>
+                            <div>
+                                <div class="vault-stat-count" id="stat-count-national_id">0</div>
+                                <div class="vault-stat-label">National IDs</div>
+                            </div>
+                        </div>
+                        <div class="vault-stat-chip" onclick="vaultManager.filterByCategory('address')" data-cat="address">
+                            <span class="vault-stat-icon">🏠</span>
+                            <div>
+                                <div class="vault-stat-count" id="stat-count-address">0</div>
+                                <div class="vault-stat-label">Address Certs</div>
+                            </div>
+                        </div>
+                        <div class="vault-stat-chip" onclick="vaultManager.filterByCategory('other')" data-cat="other">
+                            <span class="vault-stat-icon">📄</span>
+                            <div>
+                                <div class="vault-stat-count" id="stat-count-other">0</div>
+                                <div class="vault-stat-label">Other Docs</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Filter Tabs -->
+                    <div class="vault-category-tabs" id="vault-category-tabs">
+                        <button class="vault-tab-btn active" id="vtab-all" onclick="vaultManager.filterByCategory('all')">
+                            🗂️ All Documents
+                        </button>
+                        <button class="vault-tab-btn" id="vtab-passport" onclick="vaultManager.filterByCategory('passport')">
+                            🛂 Passport
+                        </button>
+                        <button class="vault-tab-btn" id="vtab-visa" onclick="vaultManager.filterByCategory('visa')">
+                            🔏 Visa
+                        </button>
+                        <button class="vault-tab-btn" id="vtab-national_id" onclick="vaultManager.filterByCategory('national_id')">
+                            🪪 National ID
+                        </button>
+                        <button class="vault-tab-btn" id="vtab-address" onclick="vaultManager.filterByCategory('address')">
+                            🏠 Address Certificate
+                        </button>
+                        <button class="vault-tab-btn" id="vtab-other" onclick="vaultManager.filterByCategory('other')">
+                            📄 Other
+                        </button>
+                    </div>
+
+                    <!-- Active Category Banner -->
+                    <div class="vault-category-banner" id="vault-category-banner" style="display: none;"></div>
+
+                    <!-- Vault Documents Grid -->
+                    <div class="vault-grid" id="vault-docs-grid">
+                        <!-- Loaded dynamically by vault.js -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 7. SUBSCRIPTIONS & PRICING VIEW -->
+        <div id="view-pricing" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="pricing_tag">Flexible Plans</span>
+                        <h2 class="section-title" data-i18n="pricing_title">Transparent Safety Plans & Trip Passes</h2>
+                        <p class="section-description" data-i18n="pricing_desc">Essential emergency assistance is always 100% free. Upgrade for live GPS radar and encrypted document storage.</p>
+                    </div>
+
+                    <div class="pricing-grid" id="pricing-plans-grid">
+                        <!-- Loaded dynamically by payments.js -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 8. ABOUT US VIEW -->
+        <div id="view-about" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container" style="max-width: 900px;">
+                    <div class="section-header">
+                        <span class="section-tag" data-i18n="about_tag">Our Mission</span>
+                        <h2 class="section-title" data-i18n="about_title">Explore Freely. Travel Safely.</h2>
+                        <p class="section-description" data-i18n="about_desc">The philosophy and security commitments behind Geonova.</p>
+                    </div>
+
+                    <div class="glass-card" style="margin-bottom: 2rem;">
+                        <h3 style="color: #ffffff; margin-bottom: 1rem;">The Geonova Initiative</h3>
+                        <p style="color: #cbd5e1; line-height: 1.8; margin-bottom: 1rem;">
+                            India is a tapestry of extraordinary landscapes—from the high glacial passes of Ladakh to the tropical backwaters of Kerala, the royal deserts of Rajasthan, and the living root bridges of Meghalaya.
+                        </p>
+                        <p style="color: #cbd5e1; line-height: 1.8;">
+                            <strong>Geonova</strong> was founded to empower domestic and international tourists to experience every corner of India with complete peace of mind. By synthesizing state-wise tourism promotion with real-time geofencing, verified local authorities, 24/7 direct helplines, and an encrypted document vault, Geonova sets a new standard for responsible, secure travel technology.
+                        </p>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3 style="color: #ffffff; margin-bottom: 1rem;">Statutory Emergency & Privacy Guarantees</h3>
+                        <ul style="list-style: disc; margin-left: 1.5rem; color: #cbd5e1; line-height: 1.8;">
+                            <li><strong>Consent-Based Tracking:</strong> GPS coordinates are only accessed with explicit user permission and can be halted instantly.</li>
+                            <li><strong>No False Claims:</strong> Emergency SOS coordinates are logged securely with direct connections to official Indian helplines (112, 100, 102, 1090, 1363).</li>
+                            <li><strong>Encrypted Document Vault:</strong> Travel documents are never exposed through public URLs or unencrypted storage.</li>
+                            <li><strong>Emergency Access is Free:</strong> Tourists are never charged to view safety protocols or contact emergency authorities.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 9. TOURIST DASHBOARD VIEW -->
+        <div id="view-dashboard" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container" id="dashboard-view">
+                    <!-- Loaded dynamically by dashboard.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- 10. ADMIN CONSOLE VIEW -->
+        <div id="view-admin" class="app-view" style="display: none;">
+            <section class="section">
+                <div class="container" id="admin-view">
+                    <!-- Loaded dynamically by admin.js -->
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div style="display: flex; align-items: center; gap: 0.6rem; font-family: 'Outfit'; font-weight: 800; font-size: 1.4rem; color: #ffffff;">
+                        <div class="brand-icon" style="width: 32px; height: 32px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        Geonova
+                    </div>
+                    <p data-i18n="footer_desc">India's smart tourist safety and state-wise tourism promotion platform. Explore Freely. Travel Safely.</p>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <span class="badge badge-emerald">Incredible India Partner</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-title" data-i18n="footer_nav">Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home" onclick="app.navigate('home')">Home</a></li>
+                        <li><a href="#explore" onclick="app.navigate('explore')">Explore 36 States</a></li>
+                        <li><a href="#map" onclick="app.navigate('map')">Live Radar Map</a></li>
+                        <li><a href="#protocols" onclick="app.navigate('protocols')">Safety Protocols</a></li>
+                        <li><a href="#packages" onclick="app.navigate('packages')">Travel Packages</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-title" data-i18n="footer_safety">Safety & Portals</h4>
+                    <ul class="footer-links">
+                        <li><a href="#login" onclick="app.navigate('login')">Sign In Gateway</a></li>
+                        <li><a href="#vault" onclick="app.navigate('vault')">Document Vault</a></li>
+                        <li><a href="#pricing" onclick="app.navigate('pricing')">Subscription Plans</a></li>
+                        <li><a href="#dashboard" onclick="app.navigate('dashboard')">Tourist Dashboard</a></li>
+                        <li><a href="#admin" onclick="app.navigate('admin')">Admin Command</a></li>
+                        <li><a href="#about" onclick="app.navigate('about')">About Initiative</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-title" data-i18n="footer_helplines">Emergency Helplines</h4>
+                    <div class="footer-emergency-box">
+                        <strong>All-in-One Emergency:</strong> 112<br />
+                        <strong>Police:</strong> 100 | <strong>Ambulance:</strong> 102/108<br />
+                        <strong>Women Helpline:</strong> 1090 / 181<br />
+                        <strong>Tourist Helpline:</strong> 1363 (24x7 Multi-lingual)<br />
+                        <strong>Cyber Crime Fraud:</strong> 1930
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div data-i18n="footer_rights">&copy; 2026 Geonova Platform. All statutory rights reserved.</div>
+                <div style="display: flex; gap: 1.5rem;">
+                    <a href="#about" onclick="app.navigate('about')">Privacy & Data Retention</a>
+                    <a href="#about" onclick="app.navigate('about')">Terms of Safety Service</a>
+                    <a href="#about" onclick="app.navigate('about')">Disclaimer</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL DIALOGS -->
+
+    <!-- 1. Auth Modal (Login / Register) -->
+    <div id="auth-modal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 id="auth-modal-title">Sign In</h3>
+                <button class="modal-close-btn" onclick="auth.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="auth-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 2. State Detail Modal -->
+    <div id="state-detail-modal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 840px;">
+            <div class="modal-header">
+                <h3>State Tourism & Safety Guide</h3>
+                <button class="modal-close-btn" onclick="tourism.closeStateModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="state-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 3. Emergency SOS Modal -->
+    <div id="sos-modal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 680px; border-color: rgba(220, 38, 38, 0.4); box-shadow: 0 0 50px rgba(220, 38, 38, 0.4);">
+            <div class="modal-body" id="sos-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- 4. Package Booking & Invoice Modal -->
+    <div id="booking-modal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3>Book Travel Package</h3>
+                <button class="modal-close-btn" onclick="packageManager.closeBookingModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="booking-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 5. Document Vault Modal -->
+    <div id="vault-modal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>Secure Document Vault</h3>
+                <button class="modal-close-btn" onclick="vaultManager.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="vault-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 6. Subscription Checkout Modal -->
+    <div id="checkout-modal" class="modal-backdrop">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3>Geonova Shield Checkout</h3>
+                <button class="modal-close-btn" onclick="paymentManager.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="checkout-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Geonova JavaScript Modules -->
+    <script src="/static/js/i18n.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/sos.js"></script>
+    <script src="/static/js/tourism.js"></script>
+    <script src="/static/js/packages.js"></script>
+    <script src="/static/js/vault.js"></script>
+    <script src="/static/js/payments.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/admin.js"></script>
+    <script src="/static/js/app.js"></script>
+
+</body>
+</html>
