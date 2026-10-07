@@ -70,7 +70,7 @@ class PackageManager {
                     guide_included: true,
                     safety_features: "GPS Tracking, SOS Support",
                     itinerary: `Explore the vibrant culture and landmarks of ${state.name}. The tour covers famous spots like ${state.capital} and much more.`,
-                    image_url: overrides.image || state.banner_image,
+                    image_url: state.banner_image || overrides.image,
                     rating: (Math.random() * 1 + 4).toFixed(1), // 4.0 to 5.0
                     reviews_count: Math.floor(Math.random() * 400) + 50
                 };
@@ -107,7 +107,7 @@ class PackageManager {
                         </span>
                     </div>
 
-                    <h3 style="font-size: 1.3rem; color: #ffffff; margin-bottom: 0.4rem;">${pkg.title}</h3>
+                    <h3 style="font-size: 1.3rem; color: var(--text-main); margin-bottom: 0.4rem;">${pkg.title}</h3>
                     <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 0.75rem;">
                         📍 ${pkg.destination} • ⏱️ ${pkg.duration_days} Days / ${pkg.duration_nights} Nights
                     </p>
@@ -119,7 +119,7 @@ class PackageManager {
                         <span class="feature-pill">👥 Max ${pkg.max_group_size} Travelers</span>
                     </div>
 
-                    <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                         ${pkg.itinerary}
                     </p>
 

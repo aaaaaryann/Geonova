@@ -64,6 +64,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Always revalidate frontend assets so UI changes are never hidden by a stale browser cache
+@app.middleware("http")
+async def no_cache_frontend(request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or path == "/index.html" or path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return response
+
 # Include Routers
 app.include_router(auth_router)
 app.include_router(tourism_router)

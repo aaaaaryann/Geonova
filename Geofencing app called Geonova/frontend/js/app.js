@@ -182,6 +182,43 @@ class App {
         );
         this.renderSafetyProtocols(filtered);
     }
+
+    selectHeritageHub(hubKey, btnElem) {
+        document.querySelectorAll('.monument-tab-btn').forEach(b => b.classList.remove('active'));
+        if (btnElem) btnElem.classList.add('active');
+
+        const hubData = {
+            taj: {
+                name: 'Golden Triangle Safe Zone (Agra - Taj Mahal)',
+                patrol: '🚨 4 Tourist Police Squads Active • 99% Safe Level',
+                title: 'Taj Mahal Heritage Shield'
+            },
+            gateway: {
+                name: 'Mumbai Coastal Safe Zone (Gateway of India)',
+                patrol: '🚨 6 Maritime & Tourist Patrol Officers Active',
+                title: 'Gateway of India Safety Hub'
+            },
+            hawa: {
+                name: 'Jaipur Royal Corridor (Hawa Mahal & City Palace)',
+                patrol: '🚨 3 Pink City Tourist Police Squads Active',
+                title: 'Hawa Mahal Heritage Shield'
+            },
+            leh: {
+                name: 'High Altitude Himalayan Zone (Leh - Ladakh Passes)',
+                patrol: '🚨 Mountain Rescue & Satellite GPS Unit Operational',
+                title: 'Ladakh High Pass Safety Shield'
+            }
+        };
+
+        const data = hubData[hubKey] || hubData.taj;
+        const nameElem = document.getElementById('monument-hub-name');
+        const patrolElem = document.getElementById('monument-hub-patrol');
+        const badgeTitleElem = document.querySelector('.monument-badge-title');
+
+        if (nameElem) nameElem.textContent = data.name;
+        if (patrolElem) patrolElem.textContent = data.patrol;
+        if (badgeTitleElem) badgeTitleElem.textContent = data.title;
+    }
 }
 
 const app = new App();

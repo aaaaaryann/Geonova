@@ -124,8 +124,8 @@ class TourismManager {
             const badgeLabel = state.category === 'state' ? 'State' : 'Union Territory';
             const badgeColor = state.category === 'state' ? 'badge-blue' : 'badge-emerald';
             
-            const overrides = stateDataOverrides[state.code] || { famous: state.capital, image: state.banner_image };
-            const displayImage = overrides.image || state.banner_image;
+            const overrides = stateDataOverrides[state.code] || { famous: state.capital };
+            const displayImage = state.banner_image || overrides.image;
 
             return `
                 <div class="state-card" onclick="tourism.openStateDetail('${state.code}')">

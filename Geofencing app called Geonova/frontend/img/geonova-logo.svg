@@ -1,0 +1,56 @@
+<svg width="280" height="80" viewBox="0 0 280 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Rich Golden Amber Gradient -->
+    <linearGradient id="gnGoldGradL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF099" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="75%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+    
+    <!-- Electric Tech Cyan Gradient -->
+    <linearGradient id="gnCyanGradL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#0369A1" />
+    </linearGradient>
+
+    <!-- Metallic Shield Inner Fill Gradient -->
+    <linearGradient id="gnShieldFillL" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.95" />
+    </linearGradient>
+  </defs>
+
+  <!-- EMBLEM ICON (Positioned on Left: CX=40, CY=40, radius scale) -->
+  <g transform="translate(0, 0)">
+    <!-- Outer Geofence Precision Orbit Ring -->
+    <circle cx="40" cy="40" r="34" stroke="url(#gnGoldGradL)" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="48 5 9 5" fill="none" opacity="0.9" />
+    <circle cx="40" cy="40" r="37" stroke="url(#gnCyanGradL)" stroke-width="0.8" stroke-dasharray="2 4" fill="none" opacity="0.5" />
+
+    <!-- Radar Cardinal Compass Tick Marks -->
+    <line x1="40" y1="2" x2="40" y2="6" stroke="url(#gnGoldGradL)" stroke-width="1.8" stroke-linecap="round" />
+    <line x1="40" y1="74" x2="40" y2="78" stroke="url(#gnGoldGradL)" stroke-width="1.8" stroke-linecap="round" />
+    <line x1="2" y1="40" x2="6" y2="40" stroke="url(#gnGoldGradL)" stroke-width="1.8" stroke-linecap="round" />
+    <line x1="74" y1="40" x2="78" y2="40" stroke="url(#gnGoldGradL)" stroke-width="1.8" stroke-linecap="round" />
+
+    <!-- Geofence Security Shield Crest -->
+    <path d="M 40 12 C 53 12 61 18 61 31 C 61 47 45 60 40 66 C 35 60 19 47 19 31 C 19 18 27 12 40 12 Z" fill="url(#gnShieldFillL)" stroke="url(#gnGoldGradL)" stroke-width="2" stroke-linejoin="round" />
+
+    <!-- Inner Cyan Tech Shield Accent Line -->
+    <path d="M 40 17 C 50 17 56 21 56 32 C 56 45 42 56 40 61 C 38 56 24 45 24 32 C 24 21 30 17 40 17 Z" fill="none" stroke="url(#gnCyanGradL)" stroke-width="1" opacity="0.7" />
+
+    <!-- Central Location Pin & Cultural Arch Icon -->
+    <path d="M 40 22 C 34 22 29 27 29 33 C 29 41 40 53 40 53 C 40 53 51 41 51 33 C 51 27 46 22 40 22 Z" fill="url(#gnGoldGradL)" />
+
+    <!-- Arch Cutout -->
+    <path d="M 35.5 42 V 35 C 35.5 32 37.5 30 40 30 C 42.5 30 44.5 32 44.5 35 V 42 H 35.5 Z" fill="#0F172A" />
+
+    <!-- Nova Star -->
+    <path d="M 40 24 L 41 27 L 44 28 L 41 29 L 40 32 L 39 29 L 36 28 L 39 27 Z" fill="#FFFFFF" />
+  </g>
+
+  <!-- BRAND NAME & TAGLINE TYPOGRAPHY -->
+  <text x="92" y="44" font-family="'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif" font-size="32" font-weight="800" fill="url(#gnGoldGradL)" letter-spacing="1">Geonova</text>
+  <text x="93" y="62" font-family="'Plus Jakarta Sans', sans-serif" font-size="9.5" font-weight="600" fill="#94A3B8" letter-spacing="1.5">SMART GEOPROTECT &amp; TOURISM</text>
+</svg>

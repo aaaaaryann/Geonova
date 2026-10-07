@@ -132,8 +132,7 @@ class VaultManager {
         if (!auth.currentUser) {
             container.innerHTML = `
                 <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: var(--bg-glass-card); border-radius: var(--radius-lg); border: 1px solid var(--navy-border);">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🔒</div>
-                    <h3 style="color: #ffffff; margin-bottom: 0.5rem;">Access Your Secure Vault</h3>
+                    <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">Access Your Secure Vault</h3>
                     <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Please log in to manage your passports, visas, national IDs, address certificates, and travel documents.</p>
                     <button class="btn btn-primary" onclick="auth.openLoginModal()">Login to Vault</button>
                 </div>

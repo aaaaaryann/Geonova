@@ -21,7 +21,7 @@ class PaymentManager {
         container.innerHTML = this.plans.map(plan => `
             <div class="pricing-card ${plan.is_popular ? 'popular' : ''}">
                 ${plan.is_popular ? '<div class="popular-badge">Most Popular for Tourists</div>' : ''}
-                <h3 style="font-size: 1.4rem; color: #ffffff;">${plan.name}</h3>
+                <h3 style="font-size: 1.4rem; color: var(--text-main);">${plan.name}</h3>
                 <div class="pricing-amount">
                     ${plan.price === 0 ? 'Free' : `₹${plan.price.toLocaleString()}`}
                     <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">/${plan.billing}</span>

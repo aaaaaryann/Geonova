@@ -872,21 +872,18 @@ class I18nManager {
 
     applyTranslations() {
         const dict = translations[this.currentLang] || translations['en'];
+        const fallback = translations['en'];
 
         // Elements with data-i18n attribute
         document.querySelectorAll('[data-i18n]').forEach(elem => {
             const key = elem.getAttribute('data-i18n');
-            if (dict[key]) {
-                elem.innerHTML = dict[key];
-            }
+            elem.innerHTML = dict[key] || fallback[key] || key;
         });
 
         // Elements with data-i18n-placeholder attribute
         document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
             const key = elem.getAttribute('data-i18n-placeholder');
-            if (dict[key]) {
-                elem.placeholder = dict[key];
-            }
+            elem.placeholder = dict[key] || fallback[key] || key;
         });
 
         // Update document title and html lang
